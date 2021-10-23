@@ -1,6 +1,12 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+
+	"github.com/SkyVillageMc/skyvillage-api/database"
+	"github.com/SkyVillageMc/skyvillage-api/db"
+	"github.com/gin-gonic/gin"
+)
 
 func InitAuth(r *gin.RouterGroup) {
 
@@ -10,6 +16,16 @@ func InitAuth(r *gin.RouterGroup) {
 		}
 
 		if c.BindJSON(&data) == nil {
+			database.DB.User.CreateOne(
+				db.User.Name.Set(data.Name),
+				db.User.Presence.Link(
+					db.Presence.PartyID.Equals("asd"),
+				),
+				db.User.PresenceID.Set(0),
+				db.User.Party.Link(
+					db.Party.ID.Equals("asd"),
+				),
+			).Exec(context.TODO())
 			c.JSON(200, gin.H{
 				"status": "success",
 			})

@@ -1,6 +1,6 @@
 datasource db {
-    provider = "sqlite"
-    url      = "file:dev.db"
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 generator db {
@@ -8,9 +8,43 @@ generator db {
 }
 
 model User {
-    id        String   @default(cuid()) @id
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    name      String
-    role      Int      @default(0)
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    name        String
+    role        Int      @default(0)
+    presence    Presence @relation(fields: [id], references: [user_id])
+    presence_id Int
+
+    party      Party  @relation(fields: [party_id], references: [id])
+    party_id   String
+}
+
+model Presence {
+    user_id          String @id
+    user             User?
+    state            String @default("")
+    large_image_key  String @default("logo_large")
+    small_image_key  String @default("loading")
+    start_time       BigInt @default(0)
+    end_time         BigInt @default(0)
+    details          String @default("")
+    large_image_text String @default("")
+    small_image_text String @default("")
+
+    party_id String
+    party    Party? @relation(fields: [party_id], references: [id])
+}
+
+model Party {
+    id String @id @default(cuid())
+
+    Presence Presence[]
+
+    min Int @default(0)
+    max Int @default(5)
+
+    join_secret String @default("")
+
+    players User[]
 }
